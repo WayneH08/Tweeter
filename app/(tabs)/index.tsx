@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Alert, Pressable, Text, TextInput, View, ScrollView } from 'react-native'
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { supabase } from '@/lib/supabase/supabase'
+import SightingForm from '@/components/SightingForm'
+import SightingCard from '@/components/SightingCard'
+import { fetchSightings, type Sighting } from '@/lib/sightings'
 
 export default function HomeScreen() {
   const [userId, setUserId] = useState<string | null>(null)
-  const [sightings, setSightings] = useState<any[]>([])
-
-  const [birdName, setBirdName] = useState('')
-  const [description, setDescription] = useState('')
-  const [latitude, setLatitude] = useState('')
-  const [longitude, setLongitude] = useState('')
+  const [sightings, setSightings] = useState<Sighting[]>([])
 
   async function checkSession() {
     const { data } = await supabase.auth.getSession()
@@ -18,14 +16,14 @@ export default function HomeScreen() {
   }
 
   async function loadSightings() {
-    const { data, error } = await supabase
-      .from('sightings')
-      .select('*')
-      .order('created_at', { ascending: false })
+    const { data, error } = await fetchSightings()
 
-    if (!error && data) {
-      setSightings(data)
+    if (error) {
+      Alert.alert('Error', error.message)
+      return
     }
+
+    setSightings(data ?? [])
   }
 
   useEffect(() => {
@@ -41,47 +39,6 @@ export default function HomeScreen() {
     }
   }, [])
 
-  async function createSighting() {
-    if (!userId) {
-      Alert.alert('Error', 'You are not logged in')
-      return
-    }
-
-    if (!birdName || !latitude || !longitude) {
-      Alert.alert('Missing info', 'Bird name, latitude, and longitude are required.')
-      return
-    }
-
-    const latNumber = Number(latitude)
-    const lngNumber = Number(longitude)
-
-    if (Number.isNaN(latNumber) || Number.isNaN(lngNumber)) {
-      Alert.alert('Invalid location', 'Latitude and longitude must be numbers.')
-      return
-    }
-
-    const { error } = await supabase.from('sightings').insert({
-      user_id: userId,
-      bird_name: birdName,
-      description,
-      latitude: latNumber,
-      longitude: lngNumber,
-    })
-
-    if (error) {
-      Alert.alert('Error', error.message)
-    } else {
-      Alert.alert('Success', 'Bird sighting created!')
-
-      setBirdName('')
-      setDescription('')
-      setLatitude('')
-      setLongitude('')
-
-      loadSightings()
-    }
-  }
-
   async function logout() {
     await supabase.auth.signOut()
     setUserId(null)
@@ -90,19 +47,24 @@ export default function HomeScreen() {
 
   return (
     <ScrollView
+      style={{ flex: 1, backgroundColor: '#f3f4f6' }}
       contentContainerStyle={{
-        flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'white',
         padding: 20,
+        paddingBottom: 120,
       }}
     >
-      <Text style={{ color: 'black', fontSize: 32, fontWeight: 'bold' }}>
+      <Text
+        style={{
+          color: '#111827',
+          fontSize: 34,
+          fontWeight: 'bold',
+          marginBottom: 6,
+        }}
+      >
         Tweeter
       </Text>
 
-      <Text style={{ color: 'black', marginTop: 12, marginBottom: 12 }}>
+      <Text style={{ color: '#374151', marginBottom: 20 }}>
         {userId ? 'Logged in ✅' : 'Not logged in ❌'}
       </Text>
 
@@ -110,14 +72,14 @@ export default function HomeScreen() {
         <Pressable
           onPress={() => router.push('/auth')}
           style={{
-            backgroundColor: 'black',
-            paddingVertical: 12,
-            paddingHorizontal: 24,
-            borderRadius: 8,
-            marginBottom: 12,
+            backgroundColor: '#111827',
+            paddingVertical: 14,
+            borderRadius: 10,
+            marginBottom: 20,
+            alignItems: 'center',
           }}
         >
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>
+          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
             Go to Login
           </Text>
         </Pressable>
@@ -125,114 +87,35 @@ export default function HomeScreen() {
 
       {userId && (
         <>
-          <TextInput
-            placeholder="Bird name"
-            value={birdName}
-            onChangeText={setBirdName}
-            style={{
-              width: '100%',
-              borderWidth: 1,
-              borderColor: '#ccc',
-              padding: 12,
-              marginBottom: 10,
-              color: 'black',
-            }}
-          />
+          <SightingForm userId={userId} onSightingCreated={loadSightings} />
 
-          <TextInput
-            placeholder="Description"
-            value={description}
-            onChangeText={setDescription}
-            style={{
-              width: '100%',
-              borderWidth: 1,
-              borderColor: '#ccc',
-              padding: 12,
-              marginBottom: 10,
-              color: 'black',
-            }}
-          />
-
-          <TextInput
-            placeholder="Latitude ex: 33.2148"
-            value={latitude}
-            onChangeText={setLatitude}
-            keyboardType="numeric"
-            style={{
-              width: '100%',
-              borderWidth: 1,
-              borderColor: '#ccc',
-              padding: 12,
-              marginBottom: 10,
-              color: 'black',
-            }}
-          />
-
-          <TextInput
-            placeholder="Longitude ex: -97.1331"
-            value={longitude}
-            onChangeText={setLongitude}
-            keyboardType="numeric"
-            style={{
-              width: '100%',
-              borderWidth: 1,
-              borderColor: '#ccc',
-              padding: 12,
-              marginBottom: 16,
-              color: 'black',
-            }}
-          />
-
-          <Pressable
-            onPress={createSighting}
-            style={{
-              backgroundColor: 'black',
-              paddingVertical: 12,
-              paddingHorizontal: 24,
-              borderRadius: 8,
-              marginBottom: 12,
-            }}
-          >
-            <Text style={{ color: 'white', fontWeight: 'bold' }}>
-              Add Bird Sighting
-            </Text>
-          </Pressable>
-
-          <Pressable onPress={logout} style={{ marginBottom: 20 }}>
-            <Text style={{ color: 'red', fontWeight: 'bold' }}>
+          <Pressable onPress={logout} style={{ marginBottom: 24 }}>
+            <Text style={{ color: '#dc2626', fontWeight: 'bold', fontSize: 16 }}>
               Log Out
             </Text>
           </Pressable>
 
-          <View style={{ width: '100%', marginTop: 10 }}>
-            <Text style={{ color: 'black', fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
+          <View style={{ width: '100%' }}>
+            <Text
+              style={{
+                color: '#111827',
+                fontSize: 26,
+                fontWeight: 'bold',
+                marginBottom: 12,
+              }}
+            >
               Recent Sightings
             </Text>
 
-            {sightings.map((s) => (
-              <View
-                key={s.id}
-                style={{
-                  borderWidth: 1,
-                  borderColor: '#ddd',
-                  padding: 12,
-                  marginBottom: 10,
-                  borderRadius: 8,
-                }}
-              >
-                <Text style={{ color: 'black', fontWeight: 'bold' }}>
-                  🐦 {s.bird_name}
-                </Text>
-
-                <Text style={{ color: 'black' }}>
-                  {s.description || 'No description'}
-                </Text>
-
-                <Text style={{ color: 'gray' }}>
-                  {s.latitude}, {s.longitude}
-                </Text>
-              </View>
-            ))}
+            {sightings.length === 0 ? (
+              <Text style={{ color: '#6b7280' }}>
+                No sightings yet.
+              </Text>
+            ) : (
+              sightings.map((sighting) => (
+                <SightingCard key={sighting.id} sighting={sighting} />
+              ))
+            )}
           </View>
         </>
       )}
