@@ -1,98 +1,241 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useEffect, useState } from 'react'
+import { Alert, Pressable, Text, TextInput, View, ScrollView } from 'react-native'
+import { router } from 'expo-router'
+import { supabase } from '@/lib/supabase/supabase'
 
 export default function HomeScreen() {
+  const [userId, setUserId] = useState<string | null>(null)
+  const [sightings, setSightings] = useState<any[]>([])
+
+  const [birdName, setBirdName] = useState('')
+  const [description, setDescription] = useState('')
+  const [latitude, setLatitude] = useState('')
+  const [longitude, setLongitude] = useState('')
+
+  async function checkSession() {
+    const { data } = await supabase.auth.getSession()
+    setUserId(data.session?.user?.id ?? null)
+  }
+
+  async function loadSightings() {
+    const { data, error } = await supabase
+      .from('sightings')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (!error && data) {
+      setSightings(data)
+    }
+  }
+
+  useEffect(() => {
+    checkSession()
+    loadSightings()
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id ?? null)
+    })
+
+    return () => {
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  async function createSighting() {
+    if (!userId) {
+      Alert.alert('Error', 'You are not logged in')
+      return
+    }
+
+    if (!birdName || !latitude || !longitude) {
+      Alert.alert('Missing info', 'Bird name, latitude, and longitude are required.')
+      return
+    }
+
+    const latNumber = Number(latitude)
+    const lngNumber = Number(longitude)
+
+    if (Number.isNaN(latNumber) || Number.isNaN(lngNumber)) {
+      Alert.alert('Invalid location', 'Latitude and longitude must be numbers.')
+      return
+    }
+
+    const { error } = await supabase.from('sightings').insert({
+      user_id: userId,
+      bird_name: birdName,
+      description,
+      latitude: latNumber,
+      longitude: lngNumber,
+    })
+
+    if (error) {
+      Alert.alert('Error', error.message)
+    } else {
+      Alert.alert('Success', 'Bird sighting created!')
+
+      setBirdName('')
+      setDescription('')
+      setLatitude('')
+      setLongitude('')
+
+      loadSightings()
+    }
+  }
+
+  async function logout() {
+    await supabase.auth.signOut()
+    setUserId(null)
+    router.push('/auth')
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ScrollView
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        padding: 20,
+      }}
+    >
+      <Text style={{ color: 'black', fontSize: 32, fontWeight: 'bold' }}>
+        Tweeter
+      </Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+      <Text style={{ color: 'black', marginTop: 12, marginBottom: 12 }}>
+        {userId ? 'Logged in ✅' : 'Not logged in ❌'}
+      </Text>
+
+      {!userId && (
+        <Pressable
+          onPress={() => router.push('/auth')}
+          style={{
+            backgroundColor: 'black',
+            paddingVertical: 12,
+            paddingHorizontal: 24,
+            borderRadius: 8,
+            marginBottom: 12,
+          }}
+        >
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>
+            Go to Login
+          </Text>
+        </Pressable>
+      )}
+
+      {userId && (
+        <>
+          <TextInput
+            placeholder="Bird name"
+            value={birdName}
+            onChangeText={setBirdName}
+            style={{
+              width: '100%',
+              borderWidth: 1,
+              borderColor: '#ccc',
+              padding: 12,
+              marginBottom: 10,
+              color: 'black',
+            }}
+          />
+
+          <TextInput
+            placeholder="Description"
+            value={description}
+            onChangeText={setDescription}
+            style={{
+              width: '100%',
+              borderWidth: 1,
+              borderColor: '#ccc',
+              padding: 12,
+              marginBottom: 10,
+              color: 'black',
+            }}
+          />
+
+          <TextInput
+            placeholder="Latitude ex: 33.2148"
+            value={latitude}
+            onChangeText={setLatitude}
+            keyboardType="numeric"
+            style={{
+              width: '100%',
+              borderWidth: 1,
+              borderColor: '#ccc',
+              padding: 12,
+              marginBottom: 10,
+              color: 'black',
+            }}
+          />
+
+          <TextInput
+            placeholder="Longitude ex: -97.1331"
+            value={longitude}
+            onChangeText={setLongitude}
+            keyboardType="numeric"
+            style={{
+              width: '100%',
+              borderWidth: 1,
+              borderColor: '#ccc',
+              padding: 12,
+              marginBottom: 16,
+              color: 'black',
+            }}
+          />
+
+          <Pressable
+            onPress={createSighting}
+            style={{
+              backgroundColor: 'black',
+              paddingVertical: 12,
+              paddingHorizontal: 24,
+              borderRadius: 8,
+              marginBottom: 12,
+            }}
+          >
+            <Text style={{ color: 'white', fontWeight: 'bold' }}>
+              Add Bird Sighting
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={logout} style={{ marginBottom: 20 }}>
+            <Text style={{ color: 'red', fontWeight: 'bold' }}>
+              Log Out
+            </Text>
+          </Pressable>
+
+          <View style={{ width: '100%', marginTop: 10 }}>
+            <Text style={{ color: 'black', fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
+              Recent Sightings
+            </Text>
+
+            {sightings.map((s) => (
+              <View
+                key={s.id}
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  padding: 12,
+                  marginBottom: 10,
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={{ color: 'black', fontWeight: 'bold' }}>
+                  🐦 {s.bird_name}
+                </Text>
+
+                <Text style={{ color: 'black' }}>
+                  {s.description || 'No description'}
+                </Text>
+
+                <Text style={{ color: 'gray' }}>
+                  {s.latitude}, {s.longitude}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </>
+      )}
+    </ScrollView>
+  )
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
