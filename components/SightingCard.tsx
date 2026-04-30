@@ -34,10 +34,8 @@ export default function SightingCard({
     minute: '2-digit',
   })
 
-  // IMPORTANT:
-  // Use the live profile data from profiles table.
-  // Do NOT fall back to sighting.avatar_url because that is the old saved avatar.
   const avatarUrl = sighting.profiles?.avatar_url ?? null
+
   const username =
     sighting.profiles?.username ||
     sighting.username ||
@@ -72,6 +70,7 @@ export default function SightingCard({
     if (avatarUrl) {
       return (
         <Image
+          key={avatarUrl}
           source={{ uri: avatarUrl }}
           style={{
             width: size,

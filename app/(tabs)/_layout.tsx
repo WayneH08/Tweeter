@@ -69,7 +69,7 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: '#2f855a',
         tabBarInactiveTintColor: '#777',
-        headerShown: true,
+        headerShown: false,
         headerRight: () => <HeaderProfileButton />,
       }}
     >
