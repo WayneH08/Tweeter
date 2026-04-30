@@ -1,36 +1,79 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Tabs, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable } from 'react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarActiveTintColor: '#2f855a',
+        tabBarInactiveTintColor: '#777',
+        headerShown: true,
+
+        // 👇 Profile icon (top right)
+        headerRight: () => (
+          <Pressable
+            onPress={() => router.push('/profile')}
+            style={{ marginRight: 16 }}
+          >
+            <Ionicons
+              name="person-circle-outline"
+              size={30}
+              color="#2f855a"
+            />
+          </Pressable>
+        ),
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Feed',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
         }}
       />
+
       <Tabs.Screen
-        name="explore"
+        name="map"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Map',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="map-outline" size={size} color={color} />
+          ),
         }}
       />
-      <Tabs.Screen name="map" options={{ title: 'Map' }} />
+
+      <Tabs.Screen
+        name="journal"
+        options={{
+          title: 'Journal',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="book-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="camera"
+        options={{
+          title: 'Identify',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="camera-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="database"
+        options={{
+          title: 'Birds',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="leaf-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

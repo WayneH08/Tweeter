@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native'
+import {
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native'
 import { router } from 'expo-router'
 import { supabase } from '@/lib/supabase/supabase'
 import SightingForm from '@/components/SightingForm'
@@ -9,6 +16,7 @@ import { fetchSightings, type Sighting } from '@/lib/sightings'
 export default function HomeScreen() {
   const [userId, setUserId] = useState<string | null>(null)
   const [sightings, setSightings] = useState<Sighting[]>([])
+  const [postModalVisible, setPostModalVisible] = useState(false)
 
   async function checkSession() {
     const { data } = await supabase.auth.getSession()
@@ -45,80 +53,163 @@ export default function HomeScreen() {
     router.push('/auth')
   }
 
+  async function handleSightingCreated() {
+    await loadSightings()
+    setPostModalVisible(false)
+  }
+
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: '#f3f4f6' }}
-      contentContainerStyle={{
-        padding: 20,
-        paddingBottom: 120,
-      }}
-    >
-      <Text
-        style={{
-          color: '#111827',
-          fontSize: 34,
-          fontWeight: 'bold',
-          marginBottom: 6,
+    <>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: '#f3f4f6' }}
+        contentContainerStyle={{
+          padding: 20,
+          paddingBottom: 120,
         }}
       >
-        Tweeter
-      </Text>
-
-      <Text style={{ color: '#374151', marginBottom: 20 }}>
-        {userId ? 'Logged in ✅' : 'Not logged in ❌'}
-      </Text>
-
-      {!userId && (
-        <Pressable
-          onPress={() => router.push('/auth')}
+        <Text
           style={{
-            backgroundColor: '#111827',
-            paddingVertical: 14,
-            borderRadius: 10,
-            marginBottom: 20,
-            alignItems: 'center',
+            color: '#111827',
+            fontSize: 34,
+            fontWeight: 'bold',
+            marginBottom: 6,
           }}
         >
-          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-            Go to Login
-          </Text>
-        </Pressable>
-      )}
+          Tweeter
+        </Text>
 
-      {userId && (
-        <>
-          <SightingForm userId={userId} onSightingCreated={loadSightings} />
+        <Text style={{ color: '#374151', marginBottom: 20 }}>
+          {userId ? 'Logged in ✅' : 'Not logged in ❌'}
+        </Text>
 
-          <Pressable onPress={logout} style={{ marginBottom: 24 }}>
-            <Text style={{ color: '#dc2626', fontWeight: 'bold', fontSize: 16 }}>
-              Log Out
+        {!userId && (
+          <Pressable
+            onPress={() => router.push('/auth')}
+            style={{
+              backgroundColor: '#111827',
+              paddingVertical: 14,
+              borderRadius: 10,
+              marginBottom: 20,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+              Go to Login
             </Text>
           </Pressable>
+        )}
 
-          <View style={{ width: '100%' }}>
-            <Text
+        {userId && (
+          <>
+            <Pressable
+              onPress={() => setPostModalVisible(true)}
               style={{
-                color: '#111827',
-                fontSize: 26,
-                fontWeight: 'bold',
-                marginBottom: 12,
+                backgroundColor: '#2f855a',
+                paddingVertical: 14,
+                borderRadius: 12,
+                marginBottom: 16,
+                alignItems: 'center',
               }}
             >
-              Recent Sightings
-            </Text>
-
-            {sightings.length === 0 ? (
-              <Text style={{ color: '#6b7280' }}>
-                No sightings yet.
+              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+                + Post a Bird Sighting
               </Text>
-            ) : (
-              sightings.map((sighting) => (
-                <SightingCard key={sighting.id} sighting={sighting} />
-              ))
+            </Pressable>
+
+            <Pressable onPress={logout} style={{ marginBottom: 24 }}>
+              <Text style={{ color: '#dc2626', fontWeight: 'bold', fontSize: 16 }}>
+                Log Out
+              </Text>
+            </Pressable>
+
+            <View style={{ width: '100%' }}>
+              <Text
+                style={{
+                  color: '#111827',
+                  fontSize: 26,
+                  fontWeight: 'bold',
+                  marginBottom: 12,
+                }}
+              >
+                Recent Sightings
+              </Text>
+
+              {sightings.length === 0 ? (
+                <Text style={{ color: '#6b7280' }}>No sightings yet.</Text>
+              ) : (
+                sightings.map((sighting) => (
+                  <SightingCard key={sighting.id} sighting={sighting} />
+                ))
+              )}
+            </View>
+          </>
+        )}
+      </ScrollView>
+
+      <Modal
+        visible={postModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setPostModalVisible(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.45)',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: 'white',
+              padding: 20,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              maxHeight: '88%',
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 16,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  color: '#111827',
+                }}
+              >
+                New Sighting
+              </Text>
+
+              <Pressable onPress={() => setPostModalVisible(false)}>
+                <Text
+                  style={{
+                    color: '#dc2626',
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                  }}
+                >
+                  Close
+                </Text>
+              </Pressable>
+            </View>
+
+            {userId && (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <SightingForm
+                  userId={userId}
+                  onSightingCreated={handleSightingCreated}
+                />
+              </ScrollView>
             )}
           </View>
-        </>
-      )}
-    </ScrollView>
+        </View>
+      </Modal>
+    </>
   )
 }
