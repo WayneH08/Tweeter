@@ -147,8 +147,7 @@ export default function HomeScreen() {
         {userId && (
           <View>
             <View style={styles.feedHeader}>
-              <Text style={styles.feedTitle}>Recent Sightings</Text>
-              <Text style={styles.feedSubtitle}>Tap any post to expand</Text>
+              <Text style={styles.feedTitle}>Bird Feed 🌿</Text>
             </View>
 
             {sightings.length === 0 ? (
@@ -316,12 +315,6 @@ function createStyles(colors: {
       color: colors.text,
       fontSize: 30,
       fontWeight: '900' as const,
-    },
-    feedSubtitle: {
-      color: colors.mutedText,
-      fontSize: 14,
-      fontWeight: '600' as const,
-      marginTop: 2,
     },
     emptyBox: {
       backgroundColor: colors.card,
