@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Alert, Button, Text, TextInput, View } from 'react-native'
 import { supabase } from '@/lib/supabase/supabase'
 import { router } from 'expo-router'
+import ScreenWrapper from '@/components/ScreenWrapper'
 
 export default function AuthScreen() {
   const [email, setEmail] = useState('')
@@ -26,60 +27,88 @@ export default function AuthScreen() {
     }
   }
 
-async function signIn() {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  async function signIn() {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-  console.log('LOGIN DATA:', data)
-  console.log('LOGIN ERROR:', error)
+    console.log('LOGIN DATA:', data)
+    console.log('LOGIN ERROR:', error)
 
-  if (error) {
-    Alert.alert('Login error', error.message)
-  } else if (!data.session) {
-    Alert.alert('Login issue', 'No session returned')
-  } else {
-    Alert.alert('Success', 'Logged in!')
-
-    // 🔥 FORCE redirect (this is key)
-    router.replace('/')
+    if (error) {
+      Alert.alert('Login error', error.message)
+    } else if (!data.session) {
+      Alert.alert('Login issue', 'No session returned')
+    } else {
+      Alert.alert('Success', 'Logged in!')
+      router.replace('/')
+    }
   }
-}
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'white' }}>
-      <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 24, color: 'black' }}>
-        Tweeter Login
-      </Text>
+    <ScreenWrapper backgroundColor="#ffffff">
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          padding: 24,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: 'bold',
+            marginBottom: 24,
+            color: 'black',
+          }}
+        >
+          Tweeter Login
+        </Text>
 
-      <TextInput
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-        style={{ borderWidth: 1, padding: 12, marginBottom: 12, color: 'black' }}
-      />
+        <TextInput
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+          style={{
+            borderWidth: 1,
+            padding: 12,
+            marginBottom: 12,
+            color: 'black',
+          }}
+        />
 
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        style={{ borderWidth: 1, padding: 12, marginBottom: 12, color: 'black' }}
-      />
+        <TextInput
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          style={{
+            borderWidth: 1,
+            padding: 12,
+            marginBottom: 12,
+            color: 'black',
+          }}
+        />
 
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={{ borderWidth: 1, padding: 12, marginBottom: 12, color: 'black' }}
-      />
+        <TextInput
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={{
+            borderWidth: 1,
+            padding: 12,
+            marginBottom: 12,
+            color: 'black',
+          }}
+        />
 
-      <Button title="Sign Up" onPress={signUp} />
-      <View style={{ height: 12 }} />
-      <Button title="Log In" onPress={signIn} />
-    </View>
+        <Button title="Sign Up" onPress={signUp} />
+        <View style={{ height: 12 }} />
+        <Button title="Log In" onPress={signIn} />
+      </View>
+    </ScreenWrapper>
   )
 }

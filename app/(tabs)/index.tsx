@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase/supabase'
 import SightingForm from '@/components/SightingForm'
 import SightingCard from '@/components/SightingCard'
 import { fetchSightings, type Sighting } from '@/lib/sightings'
+import ScreenWrapper from '@/components/ScreenWrapper'
 
 export default function HomeScreen() {
   const [userId, setUserId] = useState<string | null>(null)
@@ -59,7 +60,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <>
+    <ScreenWrapper>
       <ScrollView
         style={{ flex: 1, backgroundColor: '#f3f4f6' }}
         contentContainerStyle={{
@@ -170,6 +171,7 @@ export default function HomeScreen() {
             style={{
               backgroundColor: 'white',
               padding: 20,
+              paddingBottom: 40,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
               maxHeight: '88%',
@@ -207,7 +209,12 @@ export default function HomeScreen() {
             </View>
 
             {userId && (
-              <ScrollView showsVerticalScrollIndicator={false}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingBottom: 40,
+                }}
+              >
                 <SightingForm
                   userId={userId}
                   onSightingCreated={handleSightingCreated}
@@ -217,6 +224,6 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
-    </>
+    </ScreenWrapper>
   )
 }
