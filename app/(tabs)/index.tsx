@@ -96,19 +96,13 @@ export default function HomeScreen() {
       <ScrollView
         style={{ flex: 1, backgroundColor: '#f3f4f6' }}
         contentContainerStyle={{
-          paddingHorizontal: 18,
-          paddingTop: 10,
-          paddingBottom: 120,
+          paddingHorizontal: 14,
+          paddingTop: 4,
+          paddingBottom: 130,
         }}
+        showsVerticalScrollIndicator={false}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 14,
-          }}
-        >
+        <View style={styles.header}>
           <Pressable
             onPress={() => {
               if (userId) {
@@ -117,116 +111,50 @@ export default function HomeScreen() {
                 router.push('/auth')
               }
             }}
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 21,
-              backgroundColor: '#2f855a',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            style={styles.addButton}
           >
-            <Ionicons name="add" size={28} color="white" />
+            <Ionicons name="add" size={30} color="white" />
           </Pressable>
 
-          <Text
-            style={{
-              color: '#1f5138',
-              fontSize: 32,
-              fontWeight: 'bold',
-              letterSpacing: 0.3,
-            }}
-          >
-            Tweeter
-          </Text>
+          <View style={styles.logoBlock}>
+            <Text style={styles.logo}>Tweeter</Text>
+            <Text style={styles.tagline}>Bird sightings near you</Text>
+          </View>
 
           <Pressable
             onPress={() => router.push(userId ? '/profile' : '/auth')}
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 21,
-              backgroundColor: '#2f855a',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
-              borderWidth: 2,
-              borderColor: 'white',
-            }}
+            style={styles.profileButton}
           >
             {avatarUrl ? (
-              <Image
-                source={{ uri: avatarUrl }}
-                style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 21,
-                }}
-              />
+              <Image source={{ uri: avatarUrl }} style={styles.profileImage} />
             ) : (
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 18 }}>
+              <Text style={styles.profileInitial}>
                 {username.charAt(0).toUpperCase()}
               </Text>
             )}
           </Pressable>
         </View>
 
-        <View
-          style={{
-            backgroundColor: '#ecfdf5',
-            borderColor: '#bbf7d0',
-            borderWidth: 1,
-            borderRadius: 18,
-            paddingVertical: 14,
-            paddingHorizontal: 16,
-            marginBottom: 22,
-          }}
-        >
-          <Text
-            style={{
-              color: '#1f5138',
-              fontSize: 15,
-              fontWeight: '600',
-              textAlign: 'center',
-              lineHeight: 22,
-            }}
-          >
-            Bird sightings, profiles, and community posts.
-          </Text>
-        </View>
-
         {!userId && (
-          <Pressable
-            onPress={() => router.push('/auth')}
-            style={{
-              backgroundColor: '#2f855a',
-              paddingVertical: 15,
-              borderRadius: 16,
-              marginBottom: 24,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 17 }}>
-              Log In to Post
-            </Text>
+          <Pressable onPress={() => router.push('/auth')} style={styles.loginButton}>
+            <Text style={styles.loginButtonText}>Log In to Post</Text>
           </Pressable>
         )}
 
         {userId && (
-          <View style={{ width: '100%' }}>
-            <Text
-              style={{
-                color: '#111827',
-                fontSize: 28,
-                fontWeight: 'bold',
-                marginBottom: 14,
-              }}
-            >
-              Recent Sightings
-            </Text>
+          <View>
+            <View style={styles.feedHeader}>
+              <Text style={styles.feedTitle}>Recent Sightings</Text>
+              <Text style={styles.feedSubtitle}>Tap any post to expand</Text>
+            </View>
 
             {sightings.length === 0 ? (
-              <Text style={{ color: '#6b7280' }}>No sightings yet.</Text>
+              <View style={styles.emptyBox}>
+                <Text style={styles.emptyTitle}>No sightings yet</Text>
+                <Text style={styles.emptyText}>
+                  Be the first to share a bird sighting.
+                </Text>
+              </View>
             ) : (
               sightings.map((sighting) => (
                 <SightingCard
@@ -252,52 +180,13 @@ export default function HomeScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: 'rgba(0,0,0,0.55)',
-                justifyContent: 'center',
-                padding: 16,
-              }}
-            >
-              <View
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: 24,
-                  maxHeight: '88%',
-                  overflow: 'hidden',
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: 20,
-                    borderBottomWidth: 1,
-                    borderBottomColor: '#e5e7eb',
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 24,
-                      fontWeight: 'bold',
-                      color: '#111827',
-                    }}
-                  >
-                    New Sighting
-                  </Text>
+            <View style={styles.modalBackdrop}>
+              <View style={styles.modalCard}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>New Sighting</Text>
 
                   <Pressable onPress={() => setPostModalVisible(false)}>
-                    <Text
-                      style={{
-                        color: '#dc2626',
-                        fontWeight: 'bold',
-                        fontSize: 16,
-                      }}
-                    >
-                      Close
-                    </Text>
+                    <Text style={styles.modalClose}>Close</Text>
                   </Pressable>
                 </View>
 
@@ -323,4 +212,131 @@ export default function HomeScreen() {
       </Modal>
     </ScreenWrapper>
   )
+}
+
+const styles = {
+  header: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
+    marginBottom: 12,
+    paddingHorizontal: 2,
+  },
+  addButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#2f855a',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  logoBlock: {
+    alignItems: 'center' as const,
+  },
+  logo: {
+    color: '#1f5138',
+    fontSize: 34,
+    fontWeight: '900' as const,
+    letterSpacing: 0.2,
+  },
+  tagline: {
+    color: '#6b7280',
+    fontSize: 13,
+    fontWeight: '600' as const,
+    marginTop: -2,
+  },
+  profileButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#2f855a',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    overflow: 'hidden' as const,
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  profileImage: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+  },
+  profileInitial: {
+    color: 'white',
+    fontWeight: 'bold' as const,
+    fontSize: 18,
+  },
+  loginButton: {
+    backgroundColor: '#2f855a',
+    paddingVertical: 15,
+    borderRadius: 16,
+    marginBottom: 24,
+    alignItems: 'center' as const,
+  },
+  loginButtonText: {
+    color: 'white',
+    fontWeight: 'bold' as const,
+    fontSize: 17,
+  },
+  feedHeader: {
+    marginBottom: 12,
+  },
+  feedTitle: {
+    color: '#111827',
+    fontSize: 30,
+    fontWeight: '900' as const,
+  },
+  feedSubtitle: {
+    color: '#6b7280',
+    fontSize: 14,
+    fontWeight: '600' as const,
+    marginTop: 2,
+  },
+  emptyBox: {
+    backgroundColor: '#ffffff',
+    borderRadius: 18,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  emptyTitle: {
+    color: '#111827',
+    fontSize: 20,
+    fontWeight: '800' as const,
+    marginBottom: 4,
+  },
+  emptyText: {
+    color: '#6b7280',
+    fontSize: 15,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'center' as const,
+    padding: 16,
+  },
+  modalCard: {
+    backgroundColor: 'white',
+    borderRadius: 24,
+    maxHeight: '88%' as const,
+    overflow: 'hidden' as const,
+  },
+  modalHeader: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold' as const,
+    color: '#111827',
+  },
+  modalClose: {
+    color: '#dc2626',
+    fontWeight: 'bold' as const,
+    fontSize: 16,
+  },
 }

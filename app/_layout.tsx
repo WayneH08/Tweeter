@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Stack } from 'expo-router'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { supabase } from '@/lib/supabase/supabase'
 
 export default function RootLayout() {
@@ -26,15 +27,17 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      {session ? (
-        <>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="profile" />
-        </>
-      ) : (
-        <Stack.Screen name="auth" />
-      )}
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        {session ? (
+          <>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="profile" />
+          </>
+        ) : (
+          <Stack.Screen name="auth" />
+        )}
+      </Stack>
+    </GestureHandlerRootView>
   )
 }
