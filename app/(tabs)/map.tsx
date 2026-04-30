@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { Tabs } from 'expo-router'
 
 import { supabase } from '@/lib/supabase/supabase'
+import { useTheme } from '@/lib/theme/ThemeContext'
 
 type Sighting = {
   id: string
@@ -89,6 +90,31 @@ const INITIAL_REGION: Region = {
 }
 
 export default function MapScreen() {
+  const { theme } = useTheme()
+
+  const colors = useMemo(() => {
+    const isDark = theme.name === 'dark' || theme.name === 'goingGreen'
+
+    return {
+      background: theme.colors.background,
+      card: theme.colors.card,
+      cardSoft: theme.colors.cardAlt,
+      text: theme.colors.text,
+      mutedText: theme.colors.mutedText,
+      border: theme.colors.border,
+      primary: theme.colors.primary,
+      primaryText: theme.colors.primaryText,
+      danger: theme.colors.danger,
+      overlayCard: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.96)',
+      overlayCardStrong: isDark ? 'rgba(17, 24, 39, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+      infoBackdrop: isDark ? 'rgba(0, 0, 0, 0.65)' : 'rgba(15, 23, 42, 0.35)',
+      white: '#ffffff',
+      shadow: '#000',
+    }
+  }, [theme])
+
+  const styles = useMemo(() => createStyles(colors), [colors])
+
   const [sightings, setSightings] = useState<Sighting[]>([])
   const [loadingSightings, setLoadingSightings] = useState(true)
   const [locationLoading, setLocationLoading] = useState(true)
@@ -202,11 +228,11 @@ export default function MapScreen() {
                   styles.userLocationInnerDot,
                   {
                     backgroundColor: selectedIcon.color,
-                    borderColor: '#ffffff',
+                    borderColor: colors.white,
                   },
                 ]}
               >
-                <Ionicons name={selectedIcon.icon} size={16} color="#ffffff" />
+                <Ionicons name={selectedIcon.icon} size={16} color={colors.white} />
               </View>
             </View>
           </Marker>
@@ -225,7 +251,7 @@ export default function MapScreen() {
             >
               <View style={styles.sightingMarker}>
                 <View style={styles.sightingMarkerIcon}>
-                  <Ionicons name="leaf" size={18} color="#ffffff" />
+                  <Ionicons name="leaf" size={18} color={colors.primaryText} />
                 </View>
               </View>
 
@@ -236,7 +262,7 @@ export default function MapScreen() {
                       <Ionicons
                         name="image-outline"
                         size={24}
-                        color="#166534"
+                        color={colors.primary}
                       />
                     </View>
 
@@ -256,8 +282,9 @@ export default function MapScreen() {
                       <Ionicons
                         name="location-outline"
                         size={14}
-                        color="#64748b"
+                        color={colors.mutedText}
                       />
+
                       <Text style={styles.calloutText} numberOfLines={2}>
                         {sighting.location_name}
                       </Text>
@@ -302,7 +329,7 @@ export default function MapScreen() {
           <Ionicons
             name={isFullscreen ? 'contract-outline' : 'expand-outline'}
             size={22}
-            color="#166534"
+            color={colors.primary}
           />
         </Pressable>
 
@@ -317,7 +344,7 @@ export default function MapScreen() {
           }}
         >
           <View style={styles.titleIcon}>
-            <Ionicons name="map-outline" size={17} color="#166534" />
+            <Ionicons name="map-outline" size={17} color={colors.primary} />
           </View>
 
           <View style={styles.titleTextWrap}>
@@ -332,7 +359,7 @@ export default function MapScreen() {
           <Ionicons
             name="information-circle-outline"
             size={18}
-            color="#64748b"
+            color={colors.mutedText}
           />
         </Pressable>
 
@@ -346,7 +373,7 @@ export default function MapScreen() {
             setIconMenuVisible((current) => !current)
           }}
         >
-          <Ionicons name="color-palette-outline" size={22} color="#166534" />
+          <Ionicons name="color-palette-outline" size={22} color={colors.primary} />
         </Pressable>
       </View>
 
@@ -360,7 +387,7 @@ export default function MapScreen() {
           <View style={styles.dropdownHeader}>
             <Text style={styles.dropdownTitle}>Your icon</Text>
             <Pressable onPress={() => setIconMenuVisible(false)}>
-              <Ionicons name="close" size={18} color="#475569" />
+              <Ionicons name="close" size={18} color={colors.mutedText} />
             </Pressable>
           </View>
 
@@ -410,7 +437,7 @@ export default function MapScreen() {
                     <Ionicons
                       name="checkmark-circle"
                       size={20}
-                      color="#16a34a"
+                      color={colors.primary}
                     />
                   )}
                 </Pressable>
@@ -429,9 +456,9 @@ export default function MapScreen() {
           onPress={loadUserLocation}
         >
           {locationLoading ? (
-            <ActivityIndicator size="small" color="#166534" />
+            <ActivityIndicator size="small" color={colors.primary} />
           ) : (
-            <Ionicons name="locate" size={20} color="#166534" />
+            <Ionicons name="locate" size={20} color={colors.primary} />
           )}
 
           <Text style={styles.locationButtonText}>My location</Text>
@@ -451,7 +478,7 @@ export default function MapScreen() {
           <Pressable style={styles.infoCard}>
             <View style={styles.infoHeader}>
               <View style={styles.infoIconBubble}>
-                <Ionicons name="map-outline" size={22} color="#166534" />
+                <Ionicons name="map-outline" size={22} color={colors.primary} />
               </View>
 
               <View style={styles.infoTitleWrap}>
@@ -463,26 +490,26 @@ export default function MapScreen() {
                 style={styles.infoCloseButton}
                 onPress={() => setMapInfoVisible(false)}
               >
-                <Ionicons name="close" size={20} color="#334155" />
+                <Ionicons name="close" size={20} color={colors.text} />
               </Pressable>
             </View>
 
             <View style={styles.infoItem}>
-              <Ionicons name="leaf-outline" size={18} color="#16a34a" />
+              <Ionicons name="leaf-outline" size={18} color={colors.primary} />
               <Text style={styles.infoText}>
                 Tap bird pins to preview sighting details.
               </Text>
             </View>
 
             <View style={styles.infoItem}>
-              <Ionicons name="color-palette-outline" size={18} color="#16a34a" />
+              <Ionicons name="color-palette-outline" size={18} color={colors.primary} />
               <Text style={styles.infoText}>
                 Use the palette button to change your map icon.
               </Text>
             </View>
 
             <View style={styles.infoItem}>
-              <Ionicons name="expand-outline" size={18} color="#16a34a" />
+              <Ionicons name="expand-outline" size={18} color={colors.primary} />
               <Text style={styles.infoText}>
                 Use fullscreen mode for a cleaner map view.
               </Text>
@@ -503,7 +530,12 @@ export default function MapScreen() {
       <Tabs.Screen
         options={{
           headerShown: false,
-          tabBarStyle: isFullscreen ? { display: 'none' } : undefined,
+          tabBarStyle: [
+            styles.tabBar,
+            isFullscreen && styles.hiddenTabBar,
+          ],
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.primary,
         }}
       />
 
@@ -512,370 +544,411 @@ export default function MapScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  map: {
-    flex: 1,
-  },
+function createStyles(colors: {
+  background: string
+  card: string
+  cardSoft: string
+  text: string
+  mutedText: string
+  border: string
+  primary: string
+  primaryText: string
+  danger: string
+  overlayCard: string
+  overlayCardStrong: string
+  infoBackdrop: string
+  white: string
+  shadow: string
+}) {
+  return StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    map: {
+      flex: 1,
+    },
 
-  topControls: {
-    position: 'absolute',
-    top: 58,
-    left: 14,
-    right: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-  fullscreenTopControls: {
-    top: 58,
-  },
+    tabBar: {
+      height: 86,
+      paddingTop: 8,
+      paddingBottom: 18,
+      backgroundColor: colors.background,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    hiddenTabBar: {
+      display: 'none',
+    },
 
-  circleButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.96)',
-    shadowColor: '#000',
-    shadowOpacity: 0.14,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
-  },
+    topControls: {
+      position: 'absolute',
+      top: 58,
+      left: 14,
+      right: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 10,
+    },
+    fullscreenTopControls: {
+      top: 58,
+    },
 
-  centerTitleCard: {
-    flex: 1,
-    maxWidth: 230,
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255, 255, 255, 0.96)',
-    shadowColor: '#000',
-    shadowOpacity: 0.14,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
-  },
-  titleIcon: {
-    width: 31,
-    height: 31,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#dcfce7',
-  },
-  titleTextWrap: {
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#0f172a',
-  },
-  subtitle: {
-    marginTop: 1,
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748b',
-  },
+    circleButton: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.overlayCard,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.14,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 5,
+    },
 
-  iconDropdown: {
-    position: 'absolute',
-    top: 112,
-    right: 14,
-    width: 285,
-    maxHeight: 350,
-    padding: 12,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.98)',
-    shadowColor: '#000',
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 8,
-  },
-  fullscreenIconDropdown: {
-    top: 112,
-  },
-  dropdownHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  dropdownTitle: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#0f172a',
-  },
-  dropdownList: {
-    gap: 8,
-  },
-  dropdownOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 10,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#ffffff',
-  },
-  dropdownOptionSelected: {
-    borderColor: '#16a34a',
-    backgroundColor: '#f0fdf4',
-  },
-  dropdownIconBubble: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dropdownOptionTextWrap: {
-    flex: 1,
-  },
-  dropdownOptionName: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#0f172a',
-  },
-  dropdownOptionLabel: {
-    marginTop: 1,
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#64748b',
-  },
+    centerTitleCard: {
+      flex: 1,
+      maxWidth: 230,
+      minHeight: 48,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 999,
+      backgroundColor: colors.overlayCard,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.14,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 5,
+    },
+    titleIcon: {
+      width: 31,
+      height: 31,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.cardSoft,
+    },
+    titleTextWrap: {
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: 15,
+      fontWeight: '900',
+      color: colors.text,
+    },
+    subtitle: {
+      marginTop: 1,
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.mutedText,
+    },
 
-  bottomOverlay: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 20,
-    alignItems: 'flex-end',
-  },
-  locationButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255, 255, 255, 0.96)',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  locationButtonText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#166534',
-  },
+    iconDropdown: {
+      position: 'absolute',
+      top: 112,
+      right: 14,
+      width: 285,
+      maxHeight: 350,
+      padding: 12,
+      borderRadius: 22,
+      backgroundColor: colors.overlayCardStrong,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.18,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 8,
+    },
+    fullscreenIconDropdown: {
+      top: 112,
+    },
+    dropdownHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+    },
+    dropdownTitle: {
+      fontSize: 15,
+      fontWeight: '900',
+      color: colors.text,
+    },
+    dropdownList: {
+      gap: 8,
+    },
+    dropdownOption: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      padding: 10,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+    },
+    dropdownOptionSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.cardSoft,
+    },
+    dropdownIconBubble: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    dropdownOptionTextWrap: {
+      flex: 1,
+    },
+    dropdownOptionName: {
+      fontSize: 14,
+      fontWeight: '900',
+      color: colors.text,
+    },
+    dropdownOptionLabel: {
+      marginTop: 1,
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.mutedText,
+    },
 
-  userLocationOuterDot: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 9,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-  },
-  userLocationInnerDot: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    bottomOverlay: {
+      position: 'absolute',
+      left: 16,
+      right: 16,
+      bottom: 20,
+      alignItems: 'flex-end',
+    },
+    locationButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderRadius: 999,
+      backgroundColor: colors.overlayCard,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.12,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 4,
+    },
+    locationButtonText: {
+      fontSize: 14,
+      fontWeight: '800',
+      color: colors.primary,
+    },
 
-  sightingMarker: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sightingMarkerIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: '#ffffff',
-    backgroundColor: '#16a34a',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 5,
-  },
+    userLocationOuterDot: {
+      width: 50,
+      height: 50,
+      borderRadius: 25,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 9,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 6,
+    },
+    userLocationInnerDot: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      borderWidth: 3,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  calloutCard: {
-    width: 250,
-    padding: 12,
-    borderRadius: 18,
-    backgroundColor: '#ffffff',
-    shadowColor: '#000',
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
-  },
-  calloutHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
-  },
-  placeholderImage: {
-    width: 54,
-    height: 54,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#dcfce7',
-  },
-  calloutHeaderText: {
-    flex: 1,
-  },
-  calloutTitle: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#0f172a',
-  },
-  calloutUsername: {
-    marginTop: 2,
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#64748b',
-  },
-  calloutRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 5,
-    marginBottom: 8,
-  },
-  calloutText: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#475569',
-  },
-  calloutDescription: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '500',
-    color: '#334155',
-  },
-  calloutFooter: {
-    marginTop: 10,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
-  },
-  calloutDate: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748b',
-  },
+    sightingMarker: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sightingMarkerIcon: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 3,
+      borderColor: colors.white,
+      backgroundColor: colors.primary,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 3 },
+      elevation: 5,
+    },
 
-  infoBackdrop: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-  },
-  infoCard: {
-    width: '100%',
-    maxWidth: 390,
-    padding: 18,
-    borderRadius: 26,
-    backgroundColor: '#ffffff',
-  },
-  infoHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
-  },
-  infoIconBubble: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#dcfce7',
-  },
-  infoTitleWrap: {
-    flex: 1,
-  },
-  infoTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#0f172a',
-  },
-  infoSubtitle: {
-    marginTop: 2,
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  infoCloseButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f1f5f9',
-  },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    marginBottom: 12,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '600',
-    color: '#334155',
-  },
-  infoPlaceholder: {
-    marginTop: 6,
-    padding: 12,
-    borderRadius: 16,
-    overflow: 'hidden',
-    fontSize: 13,
-    lineHeight: 19,
-    fontWeight: '600',
-    color: '#475569',
-    backgroundColor: '#f8fafc',
-  },
+    calloutCard: {
+      width: 250,
+      padding: 12,
+      borderRadius: 18,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.18,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 6,
+    },
+    calloutHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 10,
+    },
+    placeholderImage: {
+      width: 54,
+      height: 54,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.cardSoft,
+    },
+    calloutHeaderText: {
+      flex: 1,
+    },
+    calloutTitle: {
+      fontSize: 16,
+      fontWeight: '900',
+      color: colors.text,
+    },
+    calloutUsername: {
+      marginTop: 2,
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.mutedText,
+    },
+    calloutRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 5,
+      marginBottom: 8,
+    },
+    calloutText: {
+      flex: 1,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.mutedText,
+    },
+    calloutDescription: {
+      fontSize: 13,
+      lineHeight: 18,
+      fontWeight: '500',
+      color: colors.text,
+    },
+    calloutFooter: {
+      marginTop: 10,
+      paddingTop: 8,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    calloutDate: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.mutedText,
+    },
 
-  pressed: {
-    opacity: 0.75,
-    transform: [{ scale: 0.98 }],
-  },
-})
+    infoBackdrop: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 20,
+      backgroundColor: colors.infoBackdrop,
+    },
+    infoCard: {
+      width: '100%',
+      maxWidth: 390,
+      padding: 18,
+      borderRadius: 26,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    infoHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      marginBottom: 16,
+    },
+    infoIconBubble: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.cardSoft,
+    },
+    infoTitleWrap: {
+      flex: 1,
+    },
+    infoTitle: {
+      fontSize: 20,
+      fontWeight: '900',
+      color: colors.text,
+    },
+    infoSubtitle: {
+      marginTop: 2,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.mutedText,
+    },
+    infoCloseButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.cardSoft,
+    },
+    infoItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 10,
+      marginBottom: 12,
+    },
+    infoText: {
+      flex: 1,
+      fontSize: 14,
+      lineHeight: 20,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    infoPlaceholder: {
+      marginTop: 6,
+      padding: 12,
+      borderRadius: 16,
+      overflow: 'hidden',
+      fontSize: 13,
+      lineHeight: 19,
+      fontWeight: '600',
+      color: colors.mutedText,
+      backgroundColor: colors.cardSoft,
+    },
+
+    pressed: {
+      opacity: 0.75,
+      transform: [{ scale: 0.98 }],
+    },
+  })
+}
