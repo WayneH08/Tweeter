@@ -3,8 +3,11 @@ import { Tabs, router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Image, Pressable, Text, View } from 'react-native'
 import { supabase } from '@/lib/supabase/supabase'
+import { useTheme } from '@/lib/theme/ThemeContext'
 
 function HeaderProfileButton() {
+  const { theme } = useTheme()
+
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [username, setUsername] = useState<string>('T')
 
@@ -40,7 +43,9 @@ function HeaderProfileButton() {
             width: 32,
             height: 32,
             borderRadius: 16,
-            backgroundColor: '#d1d5db',
+            backgroundColor: theme.colors.cardAlt,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
           }}
         />
       ) : (
@@ -49,12 +54,14 @@ function HeaderProfileButton() {
             width: 32,
             height: 32,
             borderRadius: 16,
-            backgroundColor: '#2f855a',
+            backgroundColor: theme.colors.primary,
             alignItems: 'center',
             justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: theme.colors.border,
           }}
         >
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>
+          <Text style={{ color: theme.colors.primaryText, fontWeight: 'bold' }}>
             {username.charAt(0).toUpperCase()}
           </Text>
         </View>
@@ -64,13 +71,38 @@ function HeaderProfileButton() {
 }
 
 export default function TabLayout() {
+  const { theme } = useTheme()
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2f855a',
-        tabBarInactiveTintColor: '#777',
         headerShown: false,
         headerRight: () => <HeaderProfileButton />,
+
+        tabBarActiveTintColor: theme.colors.tabBarActive,
+        tabBarInactiveTintColor: theme.colors.tabBarInactive,
+
+        tabBarStyle: {
+          backgroundColor: theme.colors.tabBar,
+          borderTopColor: theme.colors.border,
+          borderTopWidth: 1,
+          height: 84,
+          paddingTop: 8,
+          paddingBottom: 24,
+        },
+
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '700',
+        },
+
+        tabBarItemStyle: {
+          paddingVertical: 4,
+        },
+
+        sceneStyle: {
+          backgroundColor: theme.colors.background,
+        },
       }}
     >
       <Tabs.Screen

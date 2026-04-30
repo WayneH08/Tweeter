@@ -19,6 +19,7 @@ import { router } from 'expo-router'
 import { supabase } from '@/lib/supabase/supabase'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import type { Sighting } from '@/lib/sightings'
+import { useTheme } from '@/lib/theme/ThemeContext'
 
 type ProfileData = {
   userId: string
@@ -28,6 +29,9 @@ type ProfileData = {
 }
 
 export default function ProfileScreen() {
+  const { theme } = useTheme()
+  const styles = createStyles(theme.colors)
+
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [uploading, setUploading] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -357,13 +361,13 @@ export default function ProfileScreen() {
       >
         <View style={styles.topBar}>
           <Pressable onPress={() => router.replace('/(tabs)')} style={styles.iconButton}>
-            <Ionicons name="arrow-back" size={24} color="#111827" />
+            <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </Pressable>
 
           <Text style={styles.headerTitle}>Profile</Text>
 
           <Pressable onPress={() => router.push('/settings')} style={styles.iconButton}>
-            <Ionicons name="settings-outline" size={24} color="#111827" />
+            <Ionicons name="settings-outline" size={24} color={theme.colors.text} />
           </Pressable>
         </View>
 
@@ -380,7 +384,7 @@ export default function ProfileScreen() {
             )}
 
             <View style={[styles.editAvatarButton, uploading && { opacity: 0.6 }]}>
-              <Ionicons name="pencil" size={17} color="white" />
+              <Ionicons name="pencil" size={17} color={theme.colors.primaryText} />
             </View>
           </Pressable>
 
@@ -410,7 +414,7 @@ export default function ProfileScreen() {
             <Text style={styles.bioTitle}>About</Text>
 
             <Pressable onPress={openBioEditor} style={styles.bioEditButton}>
-              <Ionicons name="pencil-outline" size={17} color="#2f855a" />
+              <Ionicons name="pencil-outline" size={17} color={theme.colors.primary} />
             </Pressable>
           </View>
 
@@ -419,7 +423,7 @@ export default function ProfileScreen() {
               style={[
                 styles.bioText,
                 !profile?.bio && {
-                  color: '#9ca3af',
+                  color: theme.colors.mutedText,
                   fontStyle: 'italic',
                 },
               ]}
@@ -438,7 +442,7 @@ export default function ProfileScreen() {
             </View>
 
             <View style={styles.levelBadge}>
-              <Ionicons name="leaf-outline" size={20} color="#14532d" />
+              <Ionicons name="leaf-outline" size={20} color={theme.colors.primary} />
             </View>
           </View>
 
@@ -462,7 +466,7 @@ export default function ProfileScreen() {
 
         {photoSightings.length === 0 ? (
           <View style={styles.emptyPostsCard}>
-            <Ionicons name="grid-outline" size={28} color="#6b7280" />
+            <Ionicons name="grid-outline" size={28} color={theme.colors.mutedText} />
             <Text style={styles.emptyPostsTitle}>No public photo posts yet</Text>
             <Text style={styles.emptyPostsText}>
               Bird sightings with photos will show here in a profile grid.
@@ -514,7 +518,7 @@ export default function ProfileScreen() {
                   value={bioDraft}
                   onChangeText={setBioDraft}
                   placeholder="Write a short bio about your birding interests..."
-                  placeholderTextColor="#9ca3af"
+                  placeholderTextColor={theme.colors.mutedText}
                   multiline
                   maxLength={160}
                   style={styles.bioInput}
@@ -599,7 +603,7 @@ export default function ProfileScreen() {
 
                   {!!selectedSighting.location_name && (
                     <View style={styles.detailInfoRow}>
-                      <Ionicons name="location-outline" size={18} color="#2f855a" />
+                      <Ionicons name="location-outline" size={18} color={theme.colors.primary} />
                       <Text style={styles.detailInfoText}>
                         {selectedSighting.location_name}
                       </Text>
@@ -607,7 +611,7 @@ export default function ProfileScreen() {
                   )}
 
                   <View style={styles.detailInfoRow}>
-                    <Ionicons name="map-outline" size={18} color="#2f855a" />
+                    <Ionicons name="map-outline" size={18} color={theme.colors.primary} />
                     <Text style={styles.detailInfoText}>
                       {selectedSighting.latitude.toFixed(4)},{' '}
                       {selectedSighting.longitude.toFixed(4)}
@@ -623,428 +627,455 @@ export default function ProfileScreen() {
   )
 }
 
-const styles = {
-  screen: {
-    flex: 1,
-    backgroundColor: '#f3f4f6',
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 100,
-  },
-  centerScreen: {
-    flex: 1,
-    backgroundColor: '#f3f4f6',
-    padding: 24,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  topBar: {
-    width: '100%' as const,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'space-between' as const,
-    marginBottom: 22,
-  },
-  iconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'white',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-  headerTitle: {
-    color: '#111827',
-    fontSize: 18,
-    fontWeight: 'bold' as const,
-  },
-  profileHeader: {
-    alignItems: 'center' as const,
-    marginBottom: 22,
-  },
-  avatarWrap: {
-    position: 'relative' as const,
-    marginBottom: 14,
-  },
-  avatar: {
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-    backgroundColor: '#d1d5db',
-    borderWidth: 4,
-    borderColor: 'white',
-  },
-  defaultAvatar: {
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-    backgroundColor: '#2f855a',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    borderWidth: 4,
-    borderColor: 'white',
-  },
-  defaultAvatarText: {
-    color: 'white',
-    fontSize: 48,
-    fontWeight: 'bold' as const,
-  },
-  editAvatarButton: {
-    position: 'absolute' as const,
-    right: 4,
-    bottom: 4,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#2f855a',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    borderWidth: 3,
-    borderColor: 'white',
-  },
-  username: {
-    color: '#111827',
-    fontSize: 28,
-    fontWeight: 'bold' as const,
-    marginBottom: 3,
-  },
-  handle: {
-    color: '#6b7280',
-    fontSize: 15,
-  },
-  statsRow: {
-    flexDirection: 'row' as const,
-    gap: 10,
-    marginBottom: 14,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 18,
-    paddingVertical: 16,
-    alignItems: 'center' as const,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-  statNumber: {
-    color: '#111827',
-    fontSize: 22,
-    fontWeight: 'bold' as const,
-    marginBottom: 3,
-  },
-  statLabel: {
-    color: '#6b7280',
-    fontSize: 12,
-    fontWeight: '600' as const,
-  },
-  bioCard: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-  bioHeader: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'space-between' as const,
-    marginBottom: 6,
-  },
-  bioTitle: {
-    color: '#111827',
-    fontSize: 16,
-    fontWeight: 'bold' as const,
-  },
-  bioEditButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#ecfdf5',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  bioText: {
-    color: '#4b5563',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  levelCard: {
-    width: '100%' as const,
-    backgroundColor: '#1f5138',
-    padding: 22,
-    borderRadius: 24,
-    marginBottom: 18,
-  },
-  levelTopRow: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'space-between' as const,
-    marginBottom: 8,
-  },
-  levelTitle: {
-    color: '#d1fae5',
-    fontSize: 15,
-    marginBottom: 6,
-  },
-  levelNumber: {
-    color: 'white',
-    fontSize: 30,
-    fontWeight: 'bold' as const,
-  },
-  levelBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#bbf7d0',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  levelText: {
-    color: '#bbf7d0',
-    marginBottom: 14,
-  },
-  progressBar: {
-    height: 10,
-    backgroundColor: '#276749',
-    borderRadius: 999,
-    overflow: 'hidden' as const,
-    marginBottom: 12,
-  },
-  progressFill: {
-    width: '0%' as const,
-    height: '100%' as const,
-    backgroundColor: '#86efac',
-  },
-  levelHint: {
-    color: '#d1fae5',
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  postsSectionHeader: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'flex-end' as const,
-    marginBottom: 12,
-  },
-  postsTitle: {
-    color: '#111827',
-    fontSize: 20,
-    fontWeight: '900' as const,
-  },
-  postsSubtitle: {
-    color: '#6b7280',
-    fontSize: 13,
-    fontWeight: '600' as const,
-  },
-  postsGrid: {
-    flexDirection: 'row' as const,
-    flexWrap: 'wrap' as const,
-    gap: 4,
-  },
-  gridPost: {
-    width: '32.5%' as const,
-    aspectRatio: 1,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 8,
-    overflow: 'hidden' as const,
-  },
-  gridImage: {
-    width: '100%' as const,
-    height: '100%' as const,
-  },
-  emptyPostsCard: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 22,
-    alignItems: 'center' as const,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-  emptyPostsTitle: {
-    color: '#111827',
-    fontSize: 17,
-    fontWeight: 'bold' as const,
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  emptyPostsText: {
-    color: '#6b7280',
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: 'center' as const,
-  },
-  title: {
-    color: '#2f855a',
-    fontSize: 34,
-    fontWeight: 'bold' as const,
-    marginBottom: 6,
-    textAlign: 'center' as const,
-  },
-  subtitle: {
-    color: '#6b7280',
-    fontSize: 15,
-    marginBottom: 22,
-    textAlign: 'center' as const,
-  },
-  primaryButton: {
-    backgroundColor: '#2f855a',
-    paddingVertical: 15,
-    paddingHorizontal: 26,
-    borderRadius: 14,
-    alignItems: 'center' as const,
-  },
-  primaryButtonText: {
-    color: 'white',
-    fontWeight: 'bold' as const,
-    fontSize: 16,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'center' as const,
-    paddingHorizontal: 16,
-    paddingVertical: 24,
-  },
-  bioModalCard: {
-    backgroundColor: 'white',
-    borderRadius: 24,
-    overflow: 'hidden' as const,
-    maxHeight: '82%' as const,
-  },
-  bioModalScrollContent: {
-    padding: 20,
-    paddingBottom: 34,
-  },
-  postDetailCard: {
-    backgroundColor: 'white',
-    borderRadius: 24,
-    maxHeight: '88%' as const,
-    overflow: 'hidden' as const,
-  },
-  modalHeader: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold' as const,
-    color: '#111827',
-  },
-  modalClose: {
-    color: '#dc2626',
-    fontWeight: 'bold' as const,
-    fontSize: 16,
-  },
-  bioInputLabel: {
-    color: '#111827',
-    fontSize: 15,
-    fontWeight: 'bold' as const,
-    marginBottom: 8,
-  },
-  bioInput: {
-    minHeight: 120,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 16,
-    padding: 14,
-    color: '#111827',
-    fontSize: 15,
-    textAlignVertical: 'top' as const,
-    backgroundColor: '#f9fafb',
-  },
-  characterCount: {
-    textAlign: 'right' as const,
-    color: '#6b7280',
-    fontSize: 12,
-    marginTop: 6,
-    marginBottom: 14,
-  },
-  saveBioButton: {
-    backgroundColor: '#2f855a',
-    paddingVertical: 15,
-    borderRadius: 16,
-    alignItems: 'center' as const,
-  },
-  saveBioButtonText: {
-    color: 'white',
-    fontWeight: 'bold' as const,
-    fontSize: 16,
-  },
-  detailImage: {
-    width: '100%' as const,
-    height: 360,
-    backgroundColor: '#e5e7eb',
-  },
-  detailContent: {
-    padding: 18,
-  },
-  detailUserRow: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: 10,
-    marginBottom: 16,
-  },
-  detailAvatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#d1d5db',
-  },
-  detailDefaultAvatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#2f855a',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  detailDefaultAvatarText: {
-    color: 'white',
-    fontWeight: 'bold' as const,
-    fontSize: 16,
-  },
-  detailUsername: {
-    color: '#111827',
-    fontSize: 15,
-    fontWeight: 'bold' as const,
-  },
-  detailDate: {
-    color: '#6b7280',
-    fontSize: 12,
-    marginTop: 2,
-  },
-  detailBirdName: {
-    color: '#111827',
-    fontSize: 26,
-    fontWeight: '900' as const,
-    marginBottom: 8,
-  },
-  detailDescription: {
-    color: '#4b5563',
-    fontSize: 15,
-    lineHeight: 21,
-    marginBottom: 14,
-  },
-  detailInfoRow: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: 8,
-    marginTop: 8,
-  },
-  detailInfoText: {
-    color: '#374151',
-    fontSize: 14,
-    flex: 1,
-  },
+function createStyles(colors: {
+  background: string
+  card: string
+  cardAlt: string
+  text: string
+  mutedText: string
+  border: string
+  primary: string
+  primaryText: string
+  inputBackground: string
+  tabBar: string
+  tabBarActive: string
+  tabBarInactive: string
+  danger: string
+}) {
+  return {
+    screen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollContent: {
+      padding: 20,
+      paddingBottom: 100,
+      backgroundColor: colors.background,
+    },
+    centerScreen: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: 24,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    topBar: {
+      width: '100%' as const,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      marginBottom: 22,
+    },
+    iconButton: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: colors.card,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    headerTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: 'bold' as const,
+    },
+    profileHeader: {
+      alignItems: 'center' as const,
+      marginBottom: 22,
+    },
+    avatarWrap: {
+      position: 'relative' as const,
+      marginBottom: 14,
+    },
+    avatar: {
+      width: 128,
+      height: 128,
+      borderRadius: 64,
+      backgroundColor: colors.cardAlt,
+      borderWidth: 4,
+      borderColor: colors.card,
+    },
+    defaultAvatar: {
+      width: 128,
+      height: 128,
+      borderRadius: 64,
+      backgroundColor: colors.primary,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      borderWidth: 4,
+      borderColor: colors.card,
+    },
+    defaultAvatarText: {
+      color: colors.primaryText,
+      fontSize: 48,
+      fontWeight: 'bold' as const,
+    },
+    editAvatarButton: {
+      position: 'absolute' as const,
+      right: 4,
+      bottom: 4,
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      backgroundColor: colors.primary,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      borderWidth: 3,
+      borderColor: colors.card,
+    },
+    username: {
+      color: colors.text,
+      fontSize: 28,
+      fontWeight: 'bold' as const,
+      marginBottom: 3,
+    },
+    handle: {
+      color: colors.mutedText,
+      fontSize: 15,
+    },
+    statsRow: {
+      flexDirection: 'row' as const,
+      gap: 10,
+      marginBottom: 14,
+    },
+    statBox: {
+      flex: 1,
+      backgroundColor: colors.card,
+      borderRadius: 18,
+      paddingVertical: 16,
+      alignItems: 'center' as const,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    statNumber: {
+      color: colors.text,
+      fontSize: 22,
+      fontWeight: 'bold' as const,
+      marginBottom: 3,
+    },
+    statLabel: {
+      color: colors.mutedText,
+      fontSize: 12,
+      fontWeight: '600' as const,
+    },
+    bioCard: {
+      backgroundColor: colors.card,
+      borderRadius: 20,
+      padding: 18,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    bioHeader: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      marginBottom: 6,
+    },
+    bioTitle: {
+      color: colors.text,
+      fontSize: 16,
+      fontWeight: 'bold' as const,
+    },
+    bioEditButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.cardAlt,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    bioText: {
+      color: colors.text,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    levelCard: {
+      width: '100%' as const,
+      backgroundColor: colors.primary,
+      padding: 22,
+      borderRadius: 24,
+      marginBottom: 18,
+    },
+    levelTopRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      marginBottom: 8,
+    },
+    levelTitle: {
+      color: colors.primaryText,
+      fontSize: 15,
+      marginBottom: 6,
+      opacity: 0.85,
+    },
+    levelNumber: {
+      color: colors.primaryText,
+      fontSize: 30,
+      fontWeight: 'bold' as const,
+    },
+    levelBadge: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.card,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    levelText: {
+      color: colors.primaryText,
+      marginBottom: 14,
+      opacity: 0.9,
+    },
+    progressBar: {
+      height: 10,
+      backgroundColor: 'rgba(255,255,255,0.28)',
+      borderRadius: 999,
+      overflow: 'hidden' as const,
+      marginBottom: 12,
+    },
+    progressFill: {
+      width: '0%' as const,
+      height: '100%' as const,
+      backgroundColor: colors.primaryText,
+    },
+    levelHint: {
+      color: colors.primaryText,
+      fontSize: 13,
+      lineHeight: 18,
+      opacity: 0.9,
+    },
+    postsSectionHeader: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'flex-end' as const,
+      marginBottom: 12,
+    },
+    postsTitle: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '900' as const,
+    },
+    postsSubtitle: {
+      color: colors.mutedText,
+      fontSize: 13,
+      fontWeight: '600' as const,
+    },
+    postsGrid: {
+      flexDirection: 'row' as const,
+      flexWrap: 'wrap' as const,
+      gap: 4,
+    },
+    gridPost: {
+      width: '32.5%' as const,
+      aspectRatio: 1,
+      backgroundColor: colors.cardAlt,
+      borderRadius: 8,
+      overflow: 'hidden' as const,
+    },
+    gridImage: {
+      width: '100%' as const,
+      height: '100%' as const,
+    },
+    emptyPostsCard: {
+      backgroundColor: colors.card,
+      borderRadius: 20,
+      padding: 22,
+      alignItems: 'center' as const,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    emptyPostsTitle: {
+      color: colors.text,
+      fontSize: 17,
+      fontWeight: 'bold' as const,
+      marginTop: 10,
+      marginBottom: 5,
+    },
+    emptyPostsText: {
+      color: colors.mutedText,
+      fontSize: 14,
+      lineHeight: 20,
+      textAlign: 'center' as const,
+    },
+    title: {
+      color: colors.primary,
+      fontSize: 34,
+      fontWeight: 'bold' as const,
+      marginBottom: 6,
+      textAlign: 'center' as const,
+    },
+    subtitle: {
+      color: colors.mutedText,
+      fontSize: 15,
+      marginBottom: 22,
+      textAlign: 'center' as const,
+    },
+    primaryButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: 15,
+      paddingHorizontal: 26,
+      borderRadius: 14,
+      alignItems: 'center' as const,
+    },
+    primaryButtonText: {
+      color: colors.primaryText,
+      fontWeight: 'bold' as const,
+      fontSize: 16,
+    },
+    keyboardAvoidingView: {
+      flex: 1,
+    },
+    modalBackdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      justifyContent: 'center' as const,
+      paddingHorizontal: 16,
+      paddingVertical: 24,
+    },
+    bioModalCard: {
+      backgroundColor: colors.card,
+      borderRadius: 24,
+      overflow: 'hidden' as const,
+      maxHeight: '82%' as const,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    bioModalScrollContent: {
+      padding: 20,
+      paddingBottom: 34,
+      backgroundColor: colors.card,
+    },
+    postDetailCard: {
+      backgroundColor: colors.card,
+      borderRadius: 24,
+      maxHeight: '88%' as const,
+      overflow: 'hidden' as const,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    modalHeader: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'center' as const,
+      padding: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      backgroundColor: colors.card,
+    },
+    modalTitle: {
+      fontSize: 24,
+      fontWeight: 'bold' as const,
+      color: colors.text,
+    },
+    modalClose: {
+      color: colors.danger,
+      fontWeight: 'bold' as const,
+      fontSize: 16,
+    },
+    bioInputLabel: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: 'bold' as const,
+      marginBottom: 8,
+    },
+    bioInput: {
+      minHeight: 120,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 16,
+      padding: 14,
+      color: colors.text,
+      fontSize: 15,
+      textAlignVertical: 'top' as const,
+      backgroundColor: colors.inputBackground,
+    },
+    characterCount: {
+      textAlign: 'right' as const,
+      color: colors.mutedText,
+      fontSize: 12,
+      marginTop: 6,
+      marginBottom: 14,
+    },
+    saveBioButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: 15,
+      borderRadius: 16,
+      alignItems: 'center' as const,
+    },
+    saveBioButtonText: {
+      color: colors.primaryText,
+      fontWeight: 'bold' as const,
+      fontSize: 16,
+    },
+    detailImage: {
+      width: '100%' as const,
+      height: 360,
+      backgroundColor: colors.cardAlt,
+    },
+    detailContent: {
+      padding: 18,
+      backgroundColor: colors.card,
+    },
+    detailUserRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 10,
+      marginBottom: 16,
+    },
+    detailAvatar: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: colors.cardAlt,
+    },
+    detailDefaultAvatar: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: colors.primary,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    detailDefaultAvatarText: {
+      color: colors.primaryText,
+      fontWeight: 'bold' as const,
+      fontSize: 16,
+    },
+    detailUsername: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: 'bold' as const,
+    },
+    detailDate: {
+      color: colors.mutedText,
+      fontSize: 12,
+      marginTop: 2,
+    },
+    detailBirdName: {
+      color: colors.text,
+      fontSize: 26,
+      fontWeight: '900' as const,
+      marginBottom: 8,
+    },
+    detailDescription: {
+      color: colors.text,
+      fontSize: 15,
+      lineHeight: 21,
+      marginBottom: 14,
+    },
+    detailInfoRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 8,
+      marginTop: 8,
+    },
+    detailInfoText: {
+      color: colors.text,
+      fontSize: 14,
+      flex: 1,
+    },
+  }
 }

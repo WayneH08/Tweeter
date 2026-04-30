@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import type { Sighting } from '@/lib/sightings'
 import { deleteSighting } from '@/lib/sightings'
+import { useTheme } from '@/lib/theme/ThemeContext'
 
 type Props = {
   sighting: Sighting
@@ -107,20 +108,20 @@ function ZoomPhoto({ uri, onClose }: ZoomPhotoProps) {
   }
 
   return (
-    <View style={styles.imageViewerScreen}>
+    <View style={imageViewerStyles.imageViewerScreen}>
       <Pressable
         onPress={handleClose}
-        style={styles.imageCloseButton}
+        style={imageViewerStyles.imageCloseButton}
         hitSlop={18}
       >
-        <Text style={styles.imageCloseText}>✕</Text>
+        <Text style={imageViewerStyles.imageCloseText}>✕</Text>
       </Pressable>
 
       <GestureDetector gesture={combinedGesture}>
-        <Animated.View style={styles.zoomStage}>
+        <Animated.View style={imageViewerStyles.zoomStage}>
           <Animated.Image
             source={{ uri }}
-            style={[styles.zoomImage, animatedImageStyle]}
+            style={[imageViewerStyles.zoomImage, animatedImageStyle]}
             resizeMode="contain"
           />
         </Animated.View>
@@ -134,6 +135,9 @@ export default function SightingCard({
   currentUserId,
   onDeleted,
 }: Props) {
+  const { theme } = useTheme()
+  const styles = createStyles(theme.colors)
+
   const [open, setOpen] = useState(false)
   const [imageOpen, setImageOpen] = useState(false)
   const [imageSession, setImageSession] = useState(0)
@@ -194,7 +198,7 @@ export default function SightingCard({
             height: size,
             borderRadius: size / 2,
             marginRight: 10,
-            backgroundColor: '#d1d5db',
+            backgroundColor: theme.colors.cardAlt,
           }}
         />
       )
@@ -206,13 +210,13 @@ export default function SightingCard({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: '#2f855a',
+          backgroundColor: theme.colors.primary,
           alignItems: 'center',
           justifyContent: 'center',
           marginRight: 10,
         }}
       >
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>
+        <Text style={{ color: theme.colors.primaryText, fontWeight: 'bold' }}>
           {username.charAt(0).toUpperCase()}
         </Text>
       </View>
@@ -313,12 +317,8 @@ export default function SightingCard({
       >
         <ScrollView
           key={`details-${detailKey}`}
-          style={{ flex: 1, backgroundColor: '#f3f4f6' }}
-          contentContainerStyle={{
-            padding: 16,
-            paddingTop: 24,
-            paddingBottom: 40,
-          }}
+          style={styles.detailScreen}
+          contentContainerStyle={styles.detailContent}
         >
           <View style={styles.modalHeader}>
             <Pressable onPress={closeDetails} hitSlop={14}>
@@ -397,147 +397,178 @@ export default function SightingCard({
   )
 }
 
-const styles = {
-  post: {
-    backgroundColor: '#fff',
-    borderRadius: 18,
-    marginBottom: 18,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    overflow: 'hidden' as const,
-  },
-  header: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    padding: 12,
-  },
-  headerMain: {
-    flex: 1,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-  },
-  username: {
-    fontWeight: '800' as const,
-    fontSize: 16,
-    color: '#111827',
-  },
-  location: {
-    color: '#6b7280',
-    fontSize: 13,
-  },
-  dots: {
-    fontSize: 22,
-    color: '#6b7280',
-    paddingHorizontal: 6,
-    fontWeight: '800' as const,
-  },
-  image: {
-    width: '100%' as const,
-    height: 340,
-    backgroundColor: '#e5e7eb',
-  },
-  body: {
-    padding: 14,
-  },
-  compact: {
-    paddingTop: 8,
-    paddingBottom: 12,
-  },
-  bird: {
-    fontSize: 22,
-    fontWeight: '900' as const,
-    marginBottom: 6,
-    color: '#111827',
-  },
-  caption: {
-    color: '#374151',
-    fontSize: 15,
-    lineHeight: 21,
-    marginBottom: 10,
-  },
-  captionUser: {
-    fontWeight: '800' as const,
-    color: '#111827',
-  },
-  meta: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-  },
-  date: {
-    color: '#6b7280',
-    fontSize: 13,
-    fontWeight: '600' as const,
-  },
-  details: {
-    color: '#2563eb',
-    fontWeight: '800' as const,
-    fontSize: 14,
-  },
-  modalHeader: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-    marginBottom: 12,
-  },
-  close: {
-    fontSize: 26,
-    fontWeight: '900' as const,
-    color: '#111827',
-  },
-  fullImageWrap: {
-    position: 'relative' as const,
-    marginBottom: 14,
-  },
-  fullImage: {
-    width: '100%' as const,
-    height: 360,
-    borderRadius: 14,
-    backgroundColor: '#e5e7eb',
-  },
-  imageZoomBadge: {
-    position: 'absolute' as const,
-    right: 12,
-    bottom: 12,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  imageZoomIcon: {
-    fontSize: 17,
-  },
-  modalTitle: {
-    fontSize: 28,
-    fontWeight: '900' as const,
-    color: '#111827',
-    marginBottom: 14,
-  },
-  box: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-  },
-  label: {
-    color: '#6b7280',
-    fontSize: 13,
-    fontWeight: 'bold' as const,
-    marginBottom: 4,
-  },
-  text: {
-    fontSize: 16,
-    color: '#111827',
-  },
-  row: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    marginTop: 6,
-  },
+function createStyles(colors: {
+  background: string
+  card: string
+  cardAlt: string
+  text: string
+  mutedText: string
+  border: string
+  primary: string
+  primaryText: string
+  inputBackground: string
+  tabBar: string
+  tabBarActive: string
+  tabBarInactive: string
+  danger: string
+}) {
+  return {
+    post: {
+      backgroundColor: colors.card,
+      borderRadius: 18,
+      marginBottom: 18,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: 'hidden' as const,
+    },
+    header: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      padding: 12,
+      backgroundColor: colors.card,
+    },
+    headerMain: {
+      flex: 1,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+    },
+    username: {
+      fontWeight: '800' as const,
+      fontSize: 16,
+      color: colors.text,
+    },
+    location: {
+      color: colors.mutedText,
+      fontSize: 13,
+    },
+    dots: {
+      fontSize: 22,
+      color: colors.mutedText,
+      paddingHorizontal: 6,
+      fontWeight: '800' as const,
+    },
+    image: {
+      width: '100%' as const,
+      height: 340,
+      backgroundColor: colors.cardAlt,
+    },
+    body: {
+      padding: 14,
+      backgroundColor: colors.card,
+    },
+    compact: {
+      paddingTop: 8,
+      paddingBottom: 12,
+    },
+    bird: {
+      fontSize: 22,
+      fontWeight: '900' as const,
+      marginBottom: 6,
+      color: colors.text,
+    },
+    caption: {
+      color: colors.text,
+      fontSize: 15,
+      lineHeight: 21,
+      marginBottom: 10,
+    },
+    captionUser: {
+      fontWeight: '800' as const,
+      color: colors.text,
+    },
+    meta: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'center' as const,
+    },
+    date: {
+      color: colors.mutedText,
+      fontSize: 13,
+      fontWeight: '600' as const,
+    },
+    details: {
+      color: colors.primary,
+      fontWeight: '800' as const,
+      fontSize: 14,
+    },
+    detailScreen: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    detailContent: {
+      padding: 16,
+      paddingTop: 24,
+      paddingBottom: 40,
+      backgroundColor: colors.background,
+    },
+    modalHeader: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'center' as const,
+      marginBottom: 12,
+    },
+    close: {
+      fontSize: 26,
+      fontWeight: '900' as const,
+      color: colors.text,
+    },
+    fullImageWrap: {
+      position: 'relative' as const,
+      marginBottom: 14,
+    },
+    fullImage: {
+      width: '100%' as const,
+      height: 360,
+      borderRadius: 14,
+      backgroundColor: colors.cardAlt,
+    },
+    imageZoomBadge: {
+      position: 'absolute' as const,
+      right: 12,
+      bottom: 12,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    imageZoomIcon: {
+      fontSize: 17,
+    },
+    modalTitle: {
+      fontSize: 28,
+      fontWeight: '900' as const,
+      color: colors.text,
+      marginBottom: 14,
+    },
+    box: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    label: {
+      color: colors.mutedText,
+      fontSize: 13,
+      fontWeight: 'bold' as const,
+      marginBottom: 4,
+    },
+    text: {
+      fontSize: 16,
+      color: colors.text,
+    },
+    row: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      marginTop: 6,
+    },
+  }
+}
+
+const imageViewerStyles = {
   imageViewerScreen: {
     flex: 1,
     backgroundColor: 'black',

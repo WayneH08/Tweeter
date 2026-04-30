@@ -14,6 +14,7 @@ import * as Location from 'expo-location'
 import { decode } from 'base64-arraybuffer'
 import { supabase } from '@/lib/supabase/supabase'
 import { createSighting } from '@/lib/sightings'
+import { useTheme } from '@/lib/theme/ThemeContext'
 
 type LocationSuggestion = {
   display_name: string
@@ -28,6 +29,9 @@ export default function SightingForm({
   userId: string
   onSightingCreated: () => void
 }) {
+  const { theme } = useTheme()
+  const styles = createStyles(theme.colors)
+
   const [birdName, setBirdName] = useState('')
   const [description, setDescription] = useState('')
   const [image, setImage] = useState<string | null>(null)
@@ -105,9 +109,7 @@ export default function SightingForm({
       return null
     }
 
-    const { data } = supabase.storage
-      .from('bird-photos')
-      .getPublicUrl(filePath)
+    const { data } = supabase.storage.from('bird-photos').getPublicUrl(filePath)
 
     return data.publicUrl
   }
@@ -126,11 +128,7 @@ export default function SightingForm({
   }
 
   function formatReverseLocation(place: Location.LocationGeocodedAddress) {
-    const parts = [
-      place.city,
-      place.region,
-      place.country,
-    ].filter(Boolean)
+    const parts = [place.city, place.region, place.country].filter(Boolean)
 
     return parts.join(', ') || 'Current location'
   }
@@ -277,11 +275,11 @@ export default function SightingForm({
   }
 
   return (
-    <View>
+    <View style={styles.form}>
       <Text style={styles.label}>Bird name</Text>
       <TextInput
         placeholder="Example: Northern Cardinal"
-        placeholderTextColor="#9ca3af"
+        placeholderTextColor={theme.colors.mutedText}
         value={birdName}
         onChangeText={setBirdName}
         style={styles.input}
@@ -290,7 +288,7 @@ export default function SightingForm({
       <Text style={styles.label}>Description</Text>
       <TextInput
         placeholder="What did you see?"
-        placeholderTextColor="#9ca3af"
+        placeholderTextColor={theme.colors.mutedText}
         value={description}
         onChangeText={setDescription}
         multiline
@@ -302,7 +300,11 @@ export default function SightingForm({
       <Pressable
         onPress={useCurrentLocation}
         disabled={loadingLocation}
-        style={styles.locationButton}
+        style={({ pressed }) => [
+          styles.locationButton,
+          pressed && styles.pressed,
+          loadingLocation && styles.disabled,
+        ]}
       >
         <Text style={styles.locationButtonText}>
           {loadingLocation ? 'Getting location...' : 'Use Current Location'}
@@ -311,7 +313,7 @@ export default function SightingForm({
 
       <TextInput
         placeholder="Or type a city/address"
-        placeholderTextColor="#9ca3af"
+        placeholderTextColor={theme.colors.mutedText}
         value={locationText}
         onChangeText={(text) => {
           setLocationText(text)
@@ -327,7 +329,10 @@ export default function SightingForm({
             <Pressable
               key={`${item.lat}-${item.lon}-${index}`}
               onPress={() => chooseSuggestion(item)}
-              style={styles.suggestionItem}
+              style={({ pressed }) => [
+                styles.suggestionItem,
+                pressed && styles.pressedSuggestion,
+              ]}
             >
               <Text style={styles.suggestionText}>{item.display_name}</Text>
             </Pressable>
@@ -343,7 +348,10 @@ export default function SightingForm({
 
       <Text style={styles.label}>Photo</Text>
 
-      <Pressable onPress={pickImage} style={styles.imageButton}>
+      <Pressable
+        onPress={pickImage}
+        style={({ pressed }) => [styles.imageButton, pressed && styles.pressed]}
+      >
         <Text style={styles.imageButtonText}>
           {image ? 'Change Image' : 'Pick Image'}
         </Text>
@@ -352,25 +360,21 @@ export default function SightingForm({
       {image && (
         <Image
           source={{ uri: image }}
-          style={{
-            width: '100%',
-            height: 220,
-            borderRadius: 14,
-            marginBottom: 16,
-          }}
+          style={styles.previewImage}
         />
       )}
 
       <Pressable
         onPress={handleSubmit}
         disabled={submitting}
-        style={[
+        style={({ pressed }) => [
           styles.submitButton,
-          submitting && { opacity: 0.7 },
+          pressed && styles.pressed,
+          submitting && styles.disabled,
         ]}
       >
         {submitting ? (
-          <ActivityIndicator color="white" />
+          <ActivityIndicator color={theme.colors.primaryText} />
         ) : (
           <Text style={styles.submitButtonText}>Submit Sighting</Text>
         )}
@@ -379,84 +383,120 @@ export default function SightingForm({
   )
 }
 
-const styles = {
-  label: {
-    color: '#111827',
-    fontSize: 15,
-    fontWeight: '700' as const,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: '#ffffff',
-    color: '#111827',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 14,
-    fontSize: 16,
-  },
-  textArea: {
-    minHeight: 90,
-    textAlignVertical: 'top' as const,
-  },
-  locationButton: {
-    backgroundColor: '#2563eb',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 10,
-    alignItems: 'center' as const,
-  },
-  locationButtonText: {
-    color: 'white',
-    fontWeight: '700' as const,
-    fontSize: 15,
-  },
-  suggestionBox: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 12,
-    marginTop: -8,
-    marginBottom: 14,
-    overflow: 'hidden' as const,
-  },
-  suggestionItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  suggestionText: {
-    color: '#111827',
-    fontSize: 14,
-  },
-  coords: {
-    color: '#4b5563',
-    fontSize: 13,
-    marginBottom: 14,
-  },
-  imageButton: {
-    backgroundColor: '#2f855a',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
-    alignItems: 'center' as const,
-  },
-  imageButtonText: {
-    color: 'white',
-    fontWeight: '700' as const,
-    fontSize: 15,
-  },
-  submitButton: {
-    backgroundColor: '#111827',
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center' as const,
-    marginTop: 4,
-  },
-  submitButtonText: {
-    color: 'white',
-    fontWeight: 'bold' as const,
-    fontSize: 16,
-  },
+function createStyles(colors: {
+  background: string
+  card: string
+  cardAlt: string
+  text: string
+  mutedText: string
+  border: string
+  primary: string
+  primaryText: string
+  inputBackground: string
+  tabBar: string
+  tabBarActive: string
+  tabBarInactive: string
+  danger: string
+}) {
+  return {
+    form: {
+      backgroundColor: colors.card,
+    },
+    label: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '700' as const,
+      marginBottom: 6,
+    },
+    input: {
+      backgroundColor: colors.inputBackground,
+      color: colors.text,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 14,
+      fontSize: 16,
+    },
+    textArea: {
+      minHeight: 90,
+      textAlignVertical: 'top' as const,
+    },
+    locationButton: {
+      backgroundColor: colors.primary,
+      padding: 12,
+      borderRadius: 12,
+      marginBottom: 10,
+      alignItems: 'center' as const,
+    },
+    locationButtonText: {
+      color: colors.primaryText,
+      fontWeight: '700' as const,
+      fontSize: 15,
+    },
+    suggestionBox: {
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      marginTop: -8,
+      marginBottom: 14,
+      overflow: 'hidden' as const,
+    },
+    suggestionItem: {
+      padding: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    suggestionText: {
+      color: colors.text,
+      fontSize: 14,
+    },
+    coords: {
+      color: colors.mutedText,
+      fontSize: 13,
+      marginBottom: 14,
+    },
+    imageButton: {
+      backgroundColor: colors.primary,
+      padding: 12,
+      borderRadius: 12,
+      marginBottom: 12,
+      alignItems: 'center' as const,
+    },
+    imageButtonText: {
+      color: colors.primaryText,
+      fontWeight: '700' as const,
+      fontSize: 15,
+    },
+    previewImage: {
+      width: '100%' as const,
+      height: 220,
+      borderRadius: 14,
+      marginBottom: 16,
+      backgroundColor: colors.cardAlt,
+    },
+    submitButton: {
+      backgroundColor: colors.primary,
+      padding: 14,
+      borderRadius: 12,
+      alignItems: 'center' as const,
+      marginTop: 4,
+    },
+    submitButtonText: {
+      color: colors.primaryText,
+      fontWeight: 'bold' as const,
+      fontSize: 16,
+    },
+    pressed: {
+      opacity: 0.75,
+      transform: [{ scale: 0.99 }],
+    },
+    pressedSuggestion: {
+      backgroundColor: colors.cardAlt,
+    },
+    disabled: {
+      opacity: 0.7,
+    },
+  }
 }

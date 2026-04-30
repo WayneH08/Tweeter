@@ -2,6 +2,32 @@ import { useEffect, useState } from 'react'
 import { Stack } from 'expo-router'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { supabase } from '@/lib/supabase/supabase'
+import { ThemeProvider, useTheme } from '@/lib/theme/ThemeContext'
+
+function AppStack({ session }: { session: any }) {
+  const { theme } = useTheme()
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: {
+          backgroundColor: theme.colors.background,
+        },
+      }}
+    >
+      {session ? (
+        <>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="profile" />
+          <Stack.Screen name="settings" />
+        </>
+      ) : (
+        <Stack.Screen name="auth" />
+      )}
+    </Stack>
+  )
+}
 
 export default function RootLayout() {
   const [session, setSession] = useState<any>(null)
@@ -28,17 +54,9 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }}>
-        {session ? (
-          <>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="profile" />
-            <Stack.Screen name="settings" />
-          </>
-        ) : (
-          <Stack.Screen name="auth" />
-        )}
-      </Stack>
+      <ThemeProvider>
+        <AppStack session={session} />
+      </ThemeProvider>
     </GestureHandlerRootView>
   )
 }
