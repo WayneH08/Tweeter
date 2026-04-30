@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  Alert,
   Image,
   Modal,
   Pressable,
@@ -8,9 +9,22 @@ import {
   View,
 } from 'react-native'
 import type { Sighting } from '@/lib/sightings'
+import { deleteSighting } from '@/lib/sightings'
 
-export default function SightingCard({ sighting }: { sighting: Sighting }) {
+type SightingCardProps = {
+  sighting: Sighting
+  currentUserId?: string | null
+  onDeleted?: () => void
+}
+
+export default function SightingCard({
+  sighting,
+  currentUserId,
+  onDeleted,
+}: SightingCardProps) {
   const [open, setOpen] = useState(false)
+
+  const isOwner = currentUserId === sighting.user_id
 
   const date = new Date(sighting.created_at).toLocaleString([], {
     month: 'short',
@@ -19,6 +33,34 @@ export default function SightingCard({ sighting }: { sighting: Sighting }) {
     hour: 'numeric',
     minute: '2-digit',
   })
+
+  async function handleDelete() {
+    Alert.alert(
+      'Delete Post',
+      'Are you sure you want to delete this bird sighting?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const { error } = await deleteSighting(sighting.id)
+
+            if (error) {
+              Alert.alert('Error', error.message)
+              return
+            }
+
+            setOpen(false)
+            onDeleted?.()
+          },
+        },
+      ]
+    )
+  }
 
   return (
     <>
@@ -91,6 +133,12 @@ export default function SightingCard({ sighting }: { sighting: Sighting }) {
               {sighting.description || 'No notes added.'}
             </Text>
           </View>
+
+          {isOwner && (
+            <Pressable onPress={handleDelete} style={styles.deleteButton}>
+              <Text style={styles.deleteText}>Delete Post</Text>
+            </Pressable>
+          )}
         </ScrollView>
       </Modal>
     </>
@@ -184,6 +232,19 @@ const styles = {
   },
   detailText: {
     color: '#111827',
+    fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: '#dc2626',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    marginTop: 8,
+    marginBottom: 30,
+  },
+  deleteText: {
+    color: '#ffffff',
+    fontWeight: 'bold' as const,
     fontSize: 16,
   },
 }

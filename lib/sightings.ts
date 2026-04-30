@@ -30,5 +30,14 @@ export async function createSighting(data: {
   location_name: string
   photo_url?: string | null
 }) {
-  return await supabase.from('sightings').insert(data)
+  return await supabase
+    .from('sightings')
+    .insert(data)
+}
+
+export async function deleteSighting(id: string) {
+  return await supabase
+    .from('sightings')
+    .delete()
+    .eq('id', id)
 }

@@ -135,10 +135,17 @@ export default function HomeScreen() {
               </Text>
 
               {sightings.length === 0 ? (
-                <Text style={{ color: '#6b7280' }}>No sightings yet.</Text>
+                <Text style={{ color: '#6b7280' }}>
+                  No sightings yet.
+                </Text>
               ) : (
                 sightings.map((sighting) => (
-                  <SightingCard key={sighting.id} sighting={sighting} />
+                  <SightingCard
+                    key={sighting.id}
+                    sighting={sighting}
+                    currentUserId={userId}
+                    onDeleted={loadSightings}
+                  />
                 ))
               )}
             </View>
