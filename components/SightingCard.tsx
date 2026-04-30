@@ -34,15 +34,21 @@ export default function SightingCard({
     minute: '2-digit',
   })
 
+  // IMPORTANT:
+  // Use the live profile data from profiles table.
+  // Do NOT fall back to sighting.avatar_url because that is the old saved avatar.
+  const avatarUrl = sighting.profiles?.avatar_url ?? null
+  const username =
+    sighting.profiles?.username ||
+    sighting.username ||
+    'unknown'
+
   async function handleDelete() {
     Alert.alert(
       'Delete Post',
       'Are you sure you want to delete this bird sighting?',
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
@@ -62,6 +68,41 @@ export default function SightingCard({
     )
   }
 
+  function Avatar({ size = 42 }: { size?: number }) {
+    if (avatarUrl) {
+      return (
+        <Image
+          source={{ uri: avatarUrl }}
+          style={{
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            backgroundColor: '#d1d5db',
+            marginRight: 10,
+          }}
+        />
+      )
+    }
+
+    return (
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: '#2f855a',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginRight: 10,
+        }}
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>
+          {username.charAt(0).toUpperCase()}
+        </Text>
+      </View>
+    )
+  }
+
   return (
     <>
       <Pressable onPress={() => setOpen(true)}>
@@ -70,9 +111,14 @@ export default function SightingCard({
             <Image source={{ uri: sighting.photo_url }} style={styles.cardImage} />
           )}
 
-          <Text style={styles.birdName}>🐦 {sighting.bird_name}</Text>
+          <View style={styles.row}>
+            <Avatar />
 
-          <Text style={styles.meta}>👤 @{sighting.username || 'unknown'}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.birdName}>🐦 {sighting.bird_name}</Text>
+              <Text style={styles.meta}>@{username}</Text>
+            </View>
+          </View>
 
           <Text style={styles.location}>
             📍 {sighting.location_name || 'Unknown location'}
@@ -105,7 +151,11 @@ export default function SightingCard({
 
           <View style={styles.detailBox}>
             <Text style={styles.detailLabel}>Posted by</Text>
-            <Text style={styles.detailText}>@{sighting.username || 'unknown'}</Text>
+
+            <View style={styles.row}>
+              <Avatar />
+              <Text style={styles.detailText}>@{username}</Text>
+            </View>
           </View>
 
           <View style={styles.detailBox}>
@@ -118,7 +168,7 @@ export default function SightingCard({
           <View style={styles.detailBox}>
             <Text style={styles.detailLabel}>Coordinates</Text>
             <Text style={styles.detailText}>
-              {sighting.latitude}, {sighting.longitude}
+              {Number(sighting.latitude).toFixed(5)}, {Number(sighting.longitude).toFixed(5)}
             </Text>
           </View>
 
@@ -161,16 +211,19 @@ const styles = {
     borderRadius: 12,
     marginBottom: 12,
   },
+  row: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    marginBottom: 8,
+  },
   birdName: {
     color: '#111827',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold' as const,
-    marginBottom: 6,
   },
   meta: {
     color: '#4b5563',
-    fontSize: 14,
-    marginBottom: 4,
+    fontSize: 13,
   },
   location: {
     color: '#111827',

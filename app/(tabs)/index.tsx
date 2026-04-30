@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import {
   Alert,
+  Keyboard,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native'
 import { router } from 'expo-router'
@@ -136,9 +140,7 @@ export default function HomeScreen() {
               </Text>
 
               {sightings.length === 0 ? (
-                <Text style={{ color: '#6b7280' }}>
-                  No sightings yet.
-                </Text>
+                <Text style={{ color: '#6b7280' }}>No sightings yet.</Text>
               ) : (
                 sightings.map((sighting) => (
                   <SightingCard
@@ -156,73 +158,83 @@ export default function HomeScreen() {
 
       <Modal
         visible={postModalVisible}
-        animationType="slide"
+        animationType="fade"
         transparent
         onRequestClose={() => setPostModalVisible(false)}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.45)',
-            justifyContent: 'flex-end',
-          }}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View
-            style={{
-              backgroundColor: 'white',
-              padding: 20,
-              paddingBottom: 40,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              maxHeight: '88%',
-            }}
-          >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View
               style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 16,
+                flex: 1,
+                backgroundColor: 'rgba(0,0,0,0.55)',
+                justifyContent: 'center',
+                padding: 16,
               }}
             >
-              <Text
+              <View
                 style={{
-                  fontSize: 24,
-                  fontWeight: 'bold',
-                  color: '#111827',
+                  backgroundColor: 'white',
+                  borderRadius: 24,
+                  maxHeight: '88%',
+                  overflow: 'hidden',
                 }}
               >
-                New Sighting
-              </Text>
-
-              <Pressable onPress={() => setPostModalVisible(false)}>
-                <Text
+                <View
                   style={{
-                    color: '#dc2626',
-                    fontWeight: 'bold',
-                    fontSize: 16,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: 20,
+                    borderBottomWidth: 1,
+                    borderBottomColor: '#e5e7eb',
                   }}
                 >
-                  Close
-                </Text>
-              </Pressable>
-            </View>
+                  <Text
+                    style={{
+                      fontSize: 24,
+                      fontWeight: 'bold',
+                      color: '#111827',
+                    }}
+                  >
+                    New Sighting
+                  </Text>
 
-            {userId && (
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                  paddingBottom: 40,
-                }}
-              >
-                <SightingForm
-                  userId={userId}
-                  onSightingCreated={handleSightingCreated}
-                />
-              </ScrollView>
-            )}
-          </View>
-        </View>
+                  <Pressable onPress={() => setPostModalVisible(false)}>
+                    <Text
+                      style={{
+                        color: '#dc2626',
+                        fontWeight: 'bold',
+                        fontSize: 16,
+                      }}
+                    >
+                      Close
+                    </Text>
+                  </Pressable>
+                </View>
+
+                {userId && (
+                  <ScrollView
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{
+                      padding: 20,
+                      paddingBottom: 40,
+                    }}
+                  >
+                    <SightingForm
+                      userId={userId}
+                      onSightingCreated={handleSightingCreated}
+                    />
+                  </ScrollView>
+                )}
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
     </ScreenWrapper>
   )

@@ -28,7 +28,10 @@ export default function RootLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       {session ? (
-        <Stack.Screen name="(tabs)" />
+        <>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="profile" />
+        </>
       ) : (
         <Stack.Screen name="auth" />
       )}

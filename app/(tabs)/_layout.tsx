@@ -1,6 +1,67 @@
-import { Tabs, router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
+import { useEffect, useState } from 'react'
+import { Tabs, router } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
+import { Image, Pressable, Text, View } from 'react-native'
+import { supabase } from '@/lib/supabase/supabase'
+
+function HeaderProfileButton() {
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [username, setUsername] = useState<string>('T')
+
+  async function loadUser() {
+    const { data } = await supabase.auth.getUser()
+    const user = data.user
+
+    setAvatarUrl(user?.user_metadata?.avatar_url || null)
+    setUsername(user?.user_metadata?.username || 'T')
+  }
+
+  useEffect(() => {
+    loadUser()
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      loadUser()
+    })
+
+    return () => {
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  return (
+    <Pressable
+      onPress={() => router.push('/profile')}
+      style={{ marginRight: 16 }}
+    >
+      {avatarUrl ? (
+        <Image
+          source={{ uri: avatarUrl }}
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: '#d1d5db',
+          }}
+        />
+      ) : (
+        <View
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: '#2f855a',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>
+            {username.charAt(0).toUpperCase()}
+          </Text>
+        </View>
+      )}
+    </Pressable>
+  )
+}
 
 export default function TabLayout() {
   return (
@@ -9,20 +70,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#2f855a',
         tabBarInactiveTintColor: '#777',
         headerShown: true,
-
-        // 👇 Profile icon (top right)
-        headerRight: () => (
-          <Pressable
-            onPress={() => router.push('/profile')}
-            style={{ marginRight: 16 }}
-          >
-            <Ionicons
-              name="person-circle-outline"
-              size={30}
-              color="#2f855a"
-            />
-          </Pressable>
-        ),
+        headerRight: () => <HeaderProfileButton />,
       }}
     >
       <Tabs.Screen
@@ -75,5 +123,5 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
-  );
+  )
 }
